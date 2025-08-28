@@ -1,0 +1,68 @@
+/* Navbar styles for app directory */
+.navbar {
+  width: 100%;
+  background: #fff;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+.navbar-list {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.navbar-link {
+  text-decoration: none;
+  color: #222;
+  font-weight: 500;
+  position: relative;
+  padding-bottom: 4px;
+  transition: color 0.2s;
+}
+.navbar-link:hover,
+.navbar-link:focus {
+  color: #0070f3;
+}
+.navbar-link::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #0070f3;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transition: width 0.2s;
+}
+.navbar-link:hover::after,
+.navbar-link:focus::after {
+  width: 100%;
+}
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
