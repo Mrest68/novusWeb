@@ -14,7 +14,7 @@ export default function Home() {
           <div className="flex justify-between items-center py-4">
             {/* Logo */}
             <div className="flex items-center">
-              <a href="/" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <Image 
                   src="/logoNovus.jpg" 
                   alt="Novus Home Remodeling" 
@@ -22,27 +22,16 @@ export default function Home() {
                   height={60} 
                   className="rounded-lg mr-3"
                 />
-                
-              </a>
+              </Link>
             </div>
 
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-8">
-              <a href="/" className="text-orange-500 transition-colors font-medium hover:text-orange-600">
-                Home
-              </a>
-              <a href="/services" className="text-orange-500 transition-colors font-medium hover:text-orange-600">
-                Services
-              </a>
-              <a href="/about" className="text-orange-500 transition-colors font-medium hover:text-orange-600">
-                About
-              </a>
-              <a href="/reviews" className="text-orange-500 transition-colors font-medium hover:text-orange-600">
-                Reviews
-              </a>
-              <a href="/contact" className="text-orange-500 transition-colors font-medium hover:text-orange-600">
-                Contact
-              </a>
+              <Link href="/" className="text-orange-500 transition-colors font-medium hover:text-orange-600">Home</Link>
+              <Link href="/services" className="text-orange-500 transition-colors font-medium hover:text-orange-600">Services</Link>
+              <Link href="/about" className="text-orange-500 transition-colors font-medium hover:text-orange-600">About</Link>
+              <Link href="/reviews" className="text-orange-500 transition-colors font-medium hover:text-orange-600">Reviews</Link>
+              <Link href="/contact" className="text-orange-500 transition-colors font-medium hover:text-orange-600">Contact</Link>
             </div>
 
             {/* Call Button & Mobile Menu Toggle */}

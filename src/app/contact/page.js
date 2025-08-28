@@ -93,7 +93,7 @@ export default function Contact() {
           <div className="flex justify-between items-center py-6">
             {/* Logo */}
             <div className="flex items-center">
-              <a href="/" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <Image 
                   src="/logoNovus.jpg" 
                   alt="Novus Home Remodeling" 
@@ -101,32 +101,31 @@ export default function Contact() {
                   height={60} 
                   className="rounded-lg mr-3"
                 />
-                
-              </a>
+              </Link>
             </div>
 
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-12">
-              <a href="/" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
+              <Link href="/" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
                 Home
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="/services" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
+              </Link>
+              <Link href="/services" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
                 Services
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="/about" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
+              </Link>
+              <Link href="/about" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
                 About
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="/reviews" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
+              </Link>
+              <Link href="/reviews" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
                 Reviews
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="/contact" className="text-orange-500 transition-all duration-300 font-medium text-lg relative">
+              </Link>
+              <Link href="/contact" className="text-orange-500 transition-all duration-300 font-medium text-lg relative">
                 Contact
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-orange-500"></span>
-              </a>
+              </Link>
             </div>
 
             {/* Call Button & Mobile Menu Toggle */}
