@@ -1,128 +1,156 @@
 "use client";
-
+import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Navbar from "./components/Navbar";
 
 export default function Home() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  const slides = [
+    {
+      image: "/kitchenService.jpg",
+      alt: "Modern Kitchen Remodeling"
+    },
+    {
+      image: "/bathroom.jpg",
+      alt: "Luxury Bathroom Design"
+    },
+    {
+      image: "/image1.jpg",
+      alt: "Custom Home Renovation"
+    },
+    {
+      image: "/kitchenservice2.jpg",
+      alt: "Contemporary Kitchen Design"
+    }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentSlide((current) => (current + 1) % slides.length);
+        setIsTransitioning(false);
+      }, 1000); // Transition duration
+    }, 5000); // Slide duration
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    projectType: '',
+    budget: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formStatus, setFormStatus] = useState({ type: '', message: '' });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setFormStatus({ type: '', message: '' });
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.message || 'Something went wrong');
+
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        projectType: '',
+        budget: '',
+        message: ''
+      });
+      setFormStatus({
+        type: 'success',
+        message: 'Thank you! We will contact you soon.'
+      });
+    } catch (error) {
+      setFormStatus({
+        type: 'error',
+        message: error.message
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="font-sans min-h-screen">
-      {/* Navigation */}
-      <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center py-4">
-            {/* Logo */}
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <Image 
-                  src="/logoNovus.jpg" 
-                  alt="Novus Home Remodeling" 
-                  width={60} 
-                  height={60} 
-                  className="rounded-lg mr-3"
-                />
-              </Link>
+      <Navbar currentPage="home" />
+      <main id="home" className="relative min-h-screen flex flex-col pt-20">
+        {/* Modern Slideshow Background */}
+        <div className="absolute inset-0 overflow-hidden">
+          {slides.map((slide, index) => (
+            <div
+              key={slide.image}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentSlide 
+                  ? 'opacity-100 z-10' 
+                  : 'opacity-0 z-0'
+              }`}
+            >
+              <Image
+                src={slide.image}
+                alt={slide.alt}
+                fill
+                priority={index === 0}
+                className={`object-cover transform scale-110 transition-transform duration-[2000ms] ${
+                  index === currentSlide ? 'scale-100' : 'scale-110'
+                }`}
+              />
             </div>
-
-            {/* Desktop Menu */}
-            <div className="hidden md:flex space-x-8">
-              <Link href="/" className="text-orange-500 transition-colors font-medium hover:text-orange-600">Home</Link>
-              <Link href="/services" className="text-orange-500 transition-colors font-medium hover:text-orange-600">Services</Link>
-              <Link href="/about" className="text-orange-500 transition-colors font-medium hover:text-orange-600">About</Link>
-              <Link href="/reviews" className="text-orange-500 transition-colors font-medium hover:text-orange-600">Reviews</Link>
-              <Link href="/contact" className="text-orange-500 transition-colors font-medium hover:text-orange-600">Contact</Link>
-            </div>
-
-            {/* Call Button & Mobile Menu Toggle */}
-            <div className="flex items-center space-x-4">
-              <a href="tel:+15551234567" className="hidden sm:inline-block text-white px-6 py-2 rounded-lg font-semibold transition-colors" style={{backgroundColor: '#F29D35'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'} onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}>
-                (555) 123-4567
-              </a>
-              
-              {/* Mobile menu button */}
+          ))}
+          
+          {/* Slide Indicators */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+            {slides.map((_, index) => (
               <button
-                className="md:hidden text-orange-500 focus:outline-none transition-colors hover:text-orange-600"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
+                key={index}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlide 
+                    ? 'bg-white w-8' 
+                    : 'bg-white/50 hover:bg-white/75'
+                }`}
+                onClick={() => {
+                  setIsTransitioning(true);
+                  setTimeout(() => {
+                    setCurrentSlide(index);
+                    setIsTransitioning(false);
+                  }, 1000);
+                }}
+              />
+            ))}
           </div>
-
-          {/* Mobile Menu */}
-          {isMenuOpen && (
-            <div className="md:hidden border-t border-gray-200 py-4 bg-white">
-              <div className="flex flex-col space-y-4 px-4">
-                <a
-                  href="/"
-                  className="text-orange-500 transition-colors font-medium hover:text-orange-600"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Home
-                </a>
-                <a
-                  href="/services"
-                  className="text-orange-500 transition-colors font-medium hover:text-orange-600"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Services
-                </a>
-                <a
-                  href="/about"
-                  className="text-orange-500 transition-colors font-medium hover:text-orange-600"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  About
-                </a>
-                <a
-                  href="/reviews"
-                  className="text-orange-500 transition-colors font-medium hover:text-orange-600"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Reviews
-                </a>
-                <a
-                  href="/contact"
-                  className="text-orange-500 transition-colors font-medium hover:text-orange-600"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Contact
-                </a>
-                <a
-                  href="tel:+15551234567"
-                  className="text-white px-6 py-2 rounded-lg font-semibold transition-colors text-center sm:hidden"
-                  style={{backgroundColor: '#F29D35'}}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  (555) 123-4567
-                </a>
-              </div>
-            </div>
-          )}
         </div>
-      </nav>
 
-      {/* Hero Section */}
-      <main id="home" className="relative min-h-screen flex items-center pt-20">
-        {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/imageBack.jpg')"
-          }}
-        ></div>
-        
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/60"></div>
+        {/* Dark Overlay with Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-transparent"></div>
         
         {/* Content */}
         <div className="container mx-auto px-4 py-16 lg:py-24 relative z-10">
@@ -131,24 +159,25 @@ export default function Home() {
             <div className="space-y-8">
               <div className="space-y-6">
                 {/* Premium Badge */}
-                <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full">
-                  <span className="text-white font-medium text-sm tracking-wide">South Florida Remodeling Experts</span>
+                <div className="inline-flex items-center px-6 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full group transition-all duration-300 hover:bg-white/15">
+                  <div className="w-2 h-2 rounded-full mr-3" style={{backgroundColor: '#F29D35'}}></div>
+                  <span className="text-white font-medium text-sm tracking-wider">South Florida Remodeling Experts</span>
                 </div>
 
                 <div className="relative">
-                  <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight tracking-tight">
-                    <span className="block">
-                      <span className="text-white">
+                  <h1 className="text-5xl sm:text-6xl lg:text-8xl xl:text-9xl font-bold text-white leading-none tracking-tighter mb-6">
+                    <span className="block transform hover:translate-x-2 transition-transform duration-300">
+                      <span className="text-white relative">
                         NOVUS
+                        <span className="absolute -bottom-1 left-0 w-full h-1 bg-orange-400 transform scale-x-0 transition-transform duration-500 origin-left group-hover:scale-x-100"></span>
                       </span>
                     </span>
-                    <span className="block mt-1">
-                      <span className="text-white font-light">
+                    <span className="block mt-2 lg:mt-4">
+                      <span className="text-white font-light tracking-wide">
                         Home
                       </span>
                       <span 
-                        className="ml-4 font-bold"
-                        style={{color: '#F29D35'}}
+                        className="ml-4 font-extrabold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent"
                       >
                         REMODELING
                       </span>
@@ -156,80 +185,72 @@ export default function Home() {
                   </h1>
                 </div>
 
-                <h2 className="text-xl lg:text-2xl text-gray-200 font-light leading-relaxed max-w-2xl">
-                  <span className="text-orange-300 font-medium">Transforming Dreams into Reality</span>
-                  <br />
-                  Premium Construction & Design Excellence Since 2009
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl text-gray-100 font-light leading-tight max-w-4xl">
+                  <span className="text-orange-300 font-medium block mb-3 transform hover:translate-x-2 transition-transform duration-300">Transforming Dreams into Reality</span>
+                  <span className="opacity-90">Premium Construction & Design Excellence Since 2009</span>
                 </h2>
               </div>
               
               {/* Services List */}
-              <ul className="space-y-4 text-lg text-gray-200">
-                <li className="flex items-center">
-                  <div className="w-2 h-2 rounded-full mr-4" style={{backgroundColor: '#F29D35'}}></div>
-                  Kitchen & Bathroom Renovations
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xl lg:text-2xl text-gray-100 mt-12">
+                <li className="flex items-center space-x-4 group hover:translate-x-2 transition-transform duration-300">
+                  <div className="w-3 h-3 rounded-full bg-orange-400 group-hover:scale-125 transition-transform duration-300"></div>
+                  <span className="font-light">Kitchen & Bathroom Renovations</span>
                 </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 rounded-full mr-4" style={{backgroundColor: '#F29D35'}}></div>
-                  Custom Home Additions
+                <li className="flex items-center space-x-4 group hover:translate-x-2 transition-transform duration-300">
+                  <div className="w-3 h-3 rounded-full bg-orange-400 group-hover:scale-125 transition-transform duration-300"></div>
+                  <span className="font-light">Custom Home Additions</span>
                 </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 rounded-full mr-4" style={{backgroundColor: '#F29D35'}}></div>
-                  Basement Finishing
+                <li className="flex items-center space-x-4 group hover:translate-x-2 transition-transform duration-300">
+                  <div className="w-3 h-3 rounded-full bg-orange-400 group-hover:scale-125 transition-transform duration-300"></div>
+                  <span className="font-light">Basement Finishing</span>
                 </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 rounded-full mr-4" style={{backgroundColor: '#F29D35'}}></div>
-                  Exterior Renovations
+                <li className="flex items-center space-x-4 group hover:translate-x-2 transition-transform duration-300">
+                  <div className="w-3 h-3 rounded-full bg-orange-400 group-hover:scale-125 transition-transform duration-300"></div>
+                  <span className="font-light">Exterior Renovations</span>
                 </li>
               </ul>
 
-              <div className="flex gap-4 pt-4">
-                <a 
-                  href="/contact#quote-form"
-                  className="text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
-                  style={{backgroundColor: '#F29D35'}}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
+              <div className="flex flex-col sm:flex-row gap-6 mt-12">
+                <Link 
+                  href="/contact#consultation-form"
+                  className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white transition-transform duration-300 transform hover:translate-x-2"
                 >
-                  Get Free Quote
-                </a>
+                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-lg"></span>
+                  <span className="absolute bottom-0 right-0 block w-64 h-64 mb-32 mr-4 transition duration-500 origin-bottom-left transform rotate-12 translate-x-24 bg-orange-600 rounded-full opacity-30 group-hover:rotate-12 ease"></span>
+                  <span className="relative flex items-center">
+                    Schedule Free Consultation
+                    <svg className="w-5 h-5 ml-2 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                  </span>
+                </Link>
                 <a 
-                  href="/services"
-                  className="px-8 py-3 rounded-lg font-semibold transition-colors border-2 text-white"
-                  style={{borderColor: '#F29D35'}}
-                  onMouseEnter={(e) => {e.target.style.backgroundColor = '#F29D35'; e.target.style.color = 'white'}}
-                  onMouseLeave={(e) => {e.target.style.backgroundColor = 'transparent'; e.target.style.color = 'white'}}
+                  href="http://localhost:3004/services"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white transition-transform duration-300 transform hover:translate-x-2"
                 >
-                  View Portfolio
-                </a>
+                    <span className="absolute inset-0 w-full h-full border-2 border-orange-400 rounded-lg group-hover:border-orange-500 transition-colors duration-300"></span>
+                    <span className="relative flex items-center">
+                      View Portfolio
+                      <svg className="w-5 h-5 ml-2 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                      </svg>
+                    </span>
+                  </a>
               </div>
             </div>
 
-            {/* Right Column - Image with Frame */}
+            {/* Right Column with Call Now */}
             <div className="relative">
-              <div className="relative bg-white/10 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-white/20">
-                <div className="bg-white/95 p-2 rounded-xl shadow-inner">
-                  <Image
-                    src="/bathroom-Herosamaple.webp"
-                    alt="Novus Home Remodeling Showcase"
-                    width={600}
-                    height={400}
-                    className="w-full h-auto rounded-lg object-cover"
-                    priority
-                  />
-                </div>
-                {/* Decorative elements */}
-                <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full blur-xl" style={{backgroundColor: '#F29D35', opacity: 0.3}}></div>
-                <div className="absolute -bottom-4 -left-4 w-32 h-32 rounded-full blur-xl" style={{backgroundColor: '#F29D35', opacity: 0.2}}></div>
-              </div>
-              
               {/* Call Now Phone Number */}
-              <div className="text-center mt-6">
-                <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-                  Call Now
+              <div className="transform hover:scale-105 transition-transform duration-300 text-center mt-6">
+                <h1 className="text-2xl lg:text-3xl text-white mb-3 tracking-wide font-light">
+                  Ready to Transform Your Home?
                 </h1>
-                <a href="tel:+15551234567" className="text-3xl lg:text-4xl font-bold transition-colors" style={{color: '#F29D35'}} onMouseEnter={(e) => e.target.style.color = '#E8932F'} onMouseLeave={(e) => e.target.style.color = '#F29D35'}>
-                  (555) 123-4567
+                <a href="tel:+17542464687" className="text-3xl lg:text-4xl font-bold transition-colors" style={{color: '#F29D35'}} onMouseEnter={(e) => e.target.style.color = '#E8932F'} onMouseLeave={(e) => e.target.style.color = '#F29D35'}>
+                  (754) 246-4687
                 </a>
               </div>
             </div>
@@ -357,13 +378,13 @@ export default function Home() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Kitchen Remodeling - Featured */}
+            {/* Bathroom Remodeling - Featured */}
             <div className="lg:col-span-2 group relative overflow-hidden rounded-2xl text-white p-8 lg:p-12 hover:scale-105 transition-transform duration-300" style={{background: `linear-gradient(135deg, #F29D35 0%, #E8932F 100%)`}}>
               <div className="relative z-10">
                 <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
                   <div className="w-8 h-8 bg-white rounded-lg"></div>
                 </div>
-                <h3 className="text-3xl lg:text-4xl font-bold mb-4">Kitchen Remodeling</h3>
+                <h3 className="text-3xl lg:text-4xl font-bold mb-4">Bathroom Remodeling</h3>
                 <p className="mb-6 text-lg" style={{color: 'rgba(255,255,255,0.9)'}}>
                   Transform the heart of your home with custom cabinetry, premium countertops, and modern appliances.
                 </p>
@@ -399,19 +420,21 @@ export default function Home() {
               <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mb-6">
                 <div className="w-6 h-6 bg-white rounded"></div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Bathroom Renovation</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Kitchen Renovation</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Create your personal spa with luxury fixtures, custom tile work, and modern amenities.
               </p>
-              <button 
-                className="font-semibold transition-colors flex items-center"
-                style={{color: '#F29D35'}}
-                onMouseEnter={(e) => e.target.style.color = '#E8932F'}
-                onMouseLeave={(e) => e.target.style.color = '#F29D35'}
-              >
-                Explore Options
-                <span className="ml-2">→</span>
-              </button>
+              <Link href="/services">
+                <button 
+                  className="font-semibold transition-colors flex items-center"
+                  style={{color: '#F29D35'}}
+                  onMouseEnter={e => e.target.style.color = '#E8932F'}
+                  onMouseLeave={e => e.target.style.color = '#F29D35'}
+                >
+                  Explore Options
+                  <span className="ml-2">→</span>
+                </button>
+              </Link>
             </div>
 
             {/* Home Additions */}
@@ -423,15 +446,16 @@ export default function Home() {
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Expand your living space with seamless additions that blend perfectly with your existing home.
               </p>
-              <button 
+              <Link 
+                href="/services"
                 className="font-semibold transition-colors flex items-center"
                 style={{color: '#F29D35'}}
-                onMouseEnter={(e) => e.target.style.color = '#E8932F'}
-                onMouseLeave={(e) => e.target.style.color = '#F29D35'}
+                onMouseEnter={e => e.target.style.color = '#E8932F'}
+                onMouseLeave={e => e.target.style.color = '#F29D35'}
               >
                 View Projects
                 <span className="ml-2">→</span>
-              </button>
+              </Link>
             </div>
 
             {/* Basement Finishing */}
@@ -439,20 +463,21 @@ export default function Home() {
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style={{background: 'linear-gradient(135deg, #F29D35 0%, #E8932F 100%)'}}>
                 <div className="w-6 h-6 bg-white rounded"></div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Basement Finishing</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Handyman Services</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Transform unused space into functional living areas, home offices, or entertainment rooms.
               </p>
-              <a 
-                href="/contact#quote-form"
-                className="font-semibold transition-colors flex items-center"
-                style={{color: '#F29D35'}}
-                onMouseEnter={(e) => e.target.style.color = '#E8932F'}
-                onMouseLeave={(e) => e.target.style.color = '#F29D35'}
-              >
-                Get Started
-                <span className="ml-2">→</span>
-              </a>
+              <Link href="/contact">
+                <button 
+                  className="font-semibold transition-colors flex items-center"
+                  style={{color: '#F29D35'}}
+                  onMouseEnter={(e) => e.target.style.color = '#E8932F'}
+                  onMouseLeave={(e) => e.target.style.color = '#F29D35'}
+                >
+                  Get Started
+                  <span className="ml-2">→</span>
+                </button>
+              </Link>
             </div>
 
             {/* Exterior Renovations */}
@@ -464,15 +489,18 @@ export default function Home() {
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Enhance curb appeal with siding, roofing, windows, and outdoor living spaces.
               </p>
-              <button 
+              <a 
+                href="http://localhost:3004/services"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-semibold transition-colors flex items-center"
                 style={{color: '#F29D35'}}
-                onMouseEnter={(e) => e.target.style.color = '#E8932F'}
-                onMouseLeave={(e) => e.target.style.color = '#F29D35'}
+                onMouseEnter={e => e.target.style.color = '#E8932F'}
+                onMouseLeave={e => e.target.style.color = '#F29D35'}
               >
-                See Examples
+                See Example
                 <span className="ml-2">→</span>
-              </button>
+              </a>
             </div>
           </div>
 
@@ -481,14 +509,17 @@ export default function Home() {
             <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
               Ready to start your remodeling project?
             </p>
-            <button 
-              className="text-white px-10 py-4 rounded-xl font-semibold text-lg transition-colors shadow-lg hover:shadow-xl"
-              style={{backgroundColor: '#F29D35'}}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
-            >
-              Schedule Free Consultation
-            </button>
+
+            <Link href="/contact#consultation-form">
+              <button
+                className="text-white px-10 py-4 rounded-xl font-semibold text-lg transition-colors shadow-lg hover:shadow-xl"
+                style={{backgroundColor: '#F29D35'}}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
+              >
+                Schedule Free Consultation
+              </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -497,23 +528,55 @@ export default function Home() {
       <section className="py-16 bg-white dark:bg-gray-800">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left Column - Image */}
+            {/* Left Column - Image Grid */}
             <div className="relative">
-              <div className="relative bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-8 rounded-3xl shadow-xl">
-                <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-lg">
-                  <Image
-                    src="https://images.unsplash.com/photo-1484154218962-a197022b5858?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80"
-                    alt="Professional home renovation showcase"
-                    width={600}
-                    height={450}
-                    className="w-full h-auto rounded-xl object-cover"
-                    priority
-                  />
+              <div className="relative">
+                <div className="grid grid-cols-2 gap-1">
+                  <div className="transform transition-all duration-300 hover:scale-105">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <Image
+                        src="/kitchenservice2.jpg"
+                        alt="Modern Kitchen Design"
+                        width={400}
+                        height={300}
+                        className="rounded-none object-cover w-full h-full transform hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                  </div>
+                  <div className="transform transition-all duration-300 hover:scale-105">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <Image
+                        src="/bathroom.jpg"
+                        alt="Luxury Bathroom Remodel"
+                        width={400}
+                        height={300}
+                        className="rounded-none object-cover w-full h-full transform hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                  </div>
+                  <div className="transform transition-all duration-300 hover:scale-105">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <Image
+                        src="/image1.jpg"
+                        alt="Interior Renovation"
+                        width={400}
+                        height={300}
+                        className="rounded-none object-cover w-full h-full transform hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                  </div>
+                  <div className="transform transition-all duration-300 hover:scale-105">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <Image
+                        src="/kitchenService.jpg"
+                        alt="Kitchen Remodeling"
+                        width={400}
+                        height={300}
+                        className="rounded-none object-cover w-full h-full transform hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                  </div>
                 </div>
-                {/* Decorative elements */}
-                <div className="absolute -top-6 -left-6 w-20 h-20 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.2}}></div>
-                <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.3}}></div>
-                <div className="absolute top-1/2 -right-8 w-12 h-12 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.15}}></div>
               </div>
               
               {/* Experience Badge */}
@@ -578,7 +641,7 @@ export default function Home() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">Call Us</p>
-                      <p className="text-gray-600 dark:text-gray-400">(555) 123-4567</p>
+                      <p className="text-gray-600 dark:text-gray-400">(754) 246-4687</p>
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -591,14 +654,16 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <button 
-                  className="w-full text-white py-3 rounded-lg font-semibold transition-colors mt-6"
-                  style={{backgroundColor: '#F29D35'}}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
+                <Link href={"/contact#consultation-form"}>
+                  <button
+                    className="w-full text-white py-3 rounded-lg font-semibold transition-colors mt-6"
+                    style={{backgroundColor: '#F29D35'}}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
                 >
                   Schedule Consultation
                 </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -658,14 +723,15 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button 
-                  className="text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
-                  style={{backgroundColor: '#F29D35'}}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
+                <Link
+                  href="/contact#form"
+                  className="text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg inline-block"
+                  style={{ backgroundColor: '#F29D35' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E8932F'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F29D35'; }}
                 >
                   Start Your Project
-                </button>
+                </Link>
                 <button 
                   className="px-8 py-3 rounded-lg font-semibold transition-colors border-2"
                   style={{borderColor: '#F29D35', color: '#F29D35'}}
@@ -680,29 +746,27 @@ export default function Home() {
             {/* Right Column - Oval Image Holder */}
             <div className="relative">
               <div className="relative bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-8 rounded-3xl shadow-xl">
-                <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-lg">
-                  <div 
-                    className="w-full h-80 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 rounded-full flex items-center justify-center shadow-inner"
-                    style={{
-                      background: 'linear-gradient(135deg, #F29D35 0%, #E8932F 100%)',
-                      clipPath: 'ellipse(80% 100% at 50% 50%)'
-                    }}
-                  >
-                    <div className="text-center text-white">
-                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <div className="w-8 h-8 bg-white rounded-lg"></div>
-                      </div>
-                      <p className="text-lg font-semibold">Image Placeholder</p>
-                      <p className="text-sm opacity-80">600 x 450</p>
-                    </div>
+                <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-lg overflow-hidden">
+                  <div className="relative w-full h-[450px]" style={{ clipPath: 'ellipse(80% 100% at 50% 50%)' }}>
+                    <Image
+                      src="/kitchenService.jpg"
+                      alt="Kitchen Remodeling Showcase"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                      priority
+                    />
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-orange-500/20"
+                      style={{
+                        mixBlendMode: 'multiply'
+                      }}
+                    />
                   </div>
                 </div>
                 {/* Professional decorative elements */}
-                <div className="absolute -top-6 -left-6 w-20 h-20 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.2}}></div>
-                <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.3}}></div>
-                <div className="absolute top-1/2 -right-8 w-12 h-12 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.15}}></div>
               </div>
-              
+
               {/* Professional stats overlay */}
               <div className="absolute -bottom-6 -left-6 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
                 <div className="text-center">
@@ -730,13 +794,16 @@ export default function Home() {
                         background: 'linear-gradient(135deg, #F29D35 0%, #E8932F 100%)'
                       }}
                     >
-                      <div className="text-center text-white">
-                        <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                          <div className="w-10 h-10 bg-white rounded-xl"></div>
-                        </div>
-                        <p className="text-xl font-bold mb-2">About Novus</p>
-                        <p className="text-lg font-semibold">Square Placeholder</p>
-                        <p className="text-sm opacity-80">800 x 500</p>
+                      <div className="relative w-full h-full overflow-hidden rounded-2xl">
+                        <Image
+                          src="/clientTest.jpg"
+                          alt="Client Testimonial"
+                          fill
+                          priority
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                       </div>
                     </div>
                   </div>
@@ -768,7 +835,7 @@ export default function Home() {
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Our Mission</h3>
                     <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-                      We're committed to bringing your vision to life through meticulous planning, superior materials, and unmatched attention to detail. Every project is a partnership built on trust, transparency, and exceptional results.
+                      We&apos;re committed to bringing your vision to life through meticulous planning, superior materials, and unmatched attention to detail. Every project is a partnership built on trust, transparency, and exceptional results.
                     </p>
                   </div>
                 </div>
@@ -804,14 +871,11 @@ export default function Home() {
                   Ready to start your journey with Novus?
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button 
-                    className="text-white px-10 py-4 rounded-xl font-semibold text-lg transition-colors shadow-lg hover:shadow-xl"
-                    style={{backgroundColor: '#F29D35'}}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
-                  >
-                    Meet Our Team
-                  </button>
+                  <Link href={"/about#team"}
+                  className="text-white px-10 py-4 rounded-xl font-semibold text-lg transition-colors shadow-lg hover:shadow-xl">
+                    
+                      Meet Our Team
+                  </Link>
                   <button 
                     className="px-10 py-4 rounded-xl font-semibold text-lg transition-colors border-2"
                     style={{borderColor: '#F29D35', color: '#F29D35'}}
@@ -827,38 +891,68 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Video Preview Section */}
+      <section className="py-32 -mt-12 relative z-10 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto relative">
+            {/* Decorative Elements */}
+            <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-gradient-to-br from-orange-400/10 to-orange-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-gradient-to-br from-orange-400/10 to-orange-500/10 rounded-full blur-3xl"></div>
+            
+            {/* Video Title */}
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center px-6 py-3 bg-orange-100 text-orange-600 rounded-full text-base font-medium mb-6">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Featured Project Showcase
+              </div>
+              <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-4">Our Craftsmanship in Action</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">Experience the art of transformation as we turn ordinary spaces into extraordinary homes</p>
+            </div>
+
+            {/* Video Container */}
+            <div className="relative group">
+              {/* Background Gradient Frame */}
+              <div className="absolute -inset-2 bg-gradient-to-br from-orange-400 to-orange-600 rounded-3xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+              
+              {/* Video Player */}
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white">
+                <div className="relative" style={{ paddingBottom: '56.25%' }}> {/* 16:9 Aspect Ratio */}
+                  <iframe
+                    src="https://www.youtube.com/embed/V2D4okEwgtM?mute=1&autoplay=1&controls=1&loop=1&modestbranding=1&playsinline=1&rel=0"
+                    title="Home Remodeling Showcase"
+                    allowFullScreen
+                    className="absolute top-0 left-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  ></iframe>
+                </div>
+              </div>
+
+              {/* Side Decorative Elements */}
+              <div className="absolute -left-8 top-1/2 transform -translate-y-1/2 w-16 h-32 bg-gradient-to-r from-orange-400/20 to-transparent blur-2xl"></div>
+              <div className="absolute -right-8 top-1/2 transform -translate-y-1/2 w-16 h-32 bg-gradient-to-l from-orange-400/20 to-transparent blur-2xl"></div>
+            </div>
+
+            {/* Caption */}
+            <div className="mt-12 text-center">
+              <p className="text-base text-gray-500">
+                © 2025 Novus Home Remodeling | Transform Your Space with Excellence
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Decorative Wave */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-white"></div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-20 bg-white dark:bg-gray-800">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            {/* Left Column - Image */}
-            <div className="relative">
-              <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-8 rounded-3xl shadow-xl">
-                <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-lg">
-                  <div 
-                    className="w-full h-96 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 rounded-xl flex items-center justify-center shadow-inner"
-                    style={{
-                      background: 'linear-gradient(135deg, #F29D35 0%, #E8932F 100%)'
-                    }}
-                  >
-                    <div className="text-center text-white">
-                      <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <div className="w-10 h-10 bg-white rounded-xl"></div>
-                      </div>
-                      <p className="text-xl font-bold mb-2">Frequently Asked</p>
-                      <p className="text-lg font-semibold">Questions</p>
-                      <p className="text-sm opacity-80">Image Placeholder</p>
-                    </div>
-                  </div>
-                </div>
-                {/* Decorative elements */}
-                <div className="absolute -top-6 -left-6 w-20 h-20 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.2}}></div>
-                <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.3}}></div>
-                <div className="absolute top-1/2 -right-8 w-12 h-12 rounded-full" style={{backgroundColor: '#F29D35', opacity: 0.15}}></div>
-              </div>
-            </div>
-
-            {/* Right Column - FAQ List with Dropdowns */}
+          <div className="max-w-3xl mx-auto">
+            {/* FAQ List with Dropdowns */}
             <div className="space-y-6">
               <div className="text-center lg:text-left mb-8">
                 <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -929,7 +1023,7 @@ export default function Home() {
                   </button>
                   <div className="faq-content px-6 py-4 bg-white dark:bg-gray-800" style={{display: 'none'}}>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Absolutely. Novus is fully licensed, bonded, and insured. We maintain all necessary certifications and comply with local building codes. We're happy to provide proof of insurance upon request.
+                      Absolutely. Novus is fully licensed, bonded, and insured. We maintain all necessary certifications and comply with local building codes. We&apos;re happy to provide proof of insurance upon request.
                     </p>
                   </div>
                 </div>
@@ -980,10 +1074,10 @@ export default function Home() {
               {/* Call to Action */}
               <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Still have questions? We're here to help!
+                  Still have questions? We&apos;re here to help!
                 </p>
                 <a 
-                  href="/contact"
+                  href="/contact#consultation-form"
                   className="text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
                   style={{backgroundColor: '#F29D35'}}
                   onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
@@ -1020,130 +1114,162 @@ export default function Home() {
 
             {/* Form Container */}
             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 lg:p-12">
-              <form className="space-y-6">
+              {formStatus.message && (
+                <div className={`p-4 rounded-lg mb-6 ${
+                  formStatus.type === 'success' 
+                    ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-100' 
+                    : 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-100'
+                }`}>
+                  {formStatus.message}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* First and Last Name */}
                 <div className="grid md:grid-cols-2 gap-6">
-                  {/* First Name */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <div>
+                    <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       First Name *
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="Enter your first name"
                     />
                   </div>
-
-                  {/* Last Name */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <div>
+                    <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Last Name *
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                      id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="Enter your last name"
                     />
                   </div>
                 </div>
 
+                {/* Email and Phone */}
                 <div className="grid md:grid-cols-2 gap-6">
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Email Address *
                     </label>
                     <input
                       type="email"
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="your.email@example.com"
                     />
                   </div>
-
-                  {/* Phone */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Phone Number *
                     </label>
                     <input
                       type="tel"
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
-                      placeholder="(555) 123-4567"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="(754) 246-4687"
                     />
                   </div>
                 </div>
 
-                {/* Project Type */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Project Type *
-                  </label>
-                  <select className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200">
-                    <option value="">Select your project type</option>
-                    <option value="kitchen">Kitchen Remodeling</option>
-                    <option value="bathroom">Bathroom Renovation</option>
-                    <option value="addition">Home Addition</option>
-                    <option value="basement">Basement Finishing</option>
-                    <option value="exterior">Exterior Renovation</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                {/* Budget Range */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Budget Range
-                  </label>
-                  <select className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200">
-                    <option value="">Select your budget range</option>
-                    <option value="10k-25k">$10,000 - $25,000</option>
-                    <option value="25k-50k">$25,000 - $50,000</option>
-                    <option value="50k-100k">$50,000 - $100,000</option>
-                    <option value="100k+">$100,000+</option>
-                    <option value="discuss">Prefer to discuss</option>
-                  </select>
+                {/* Project Type and Budget */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="projectType" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Project Type *
+                    </label>
+                    <select
+                      id="projectType"
+                      name="projectType"
+                      value={formData.projectType}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="">Select your project type</option>
+                      <option value="kitchen">Kitchen Remodeling</option>
+                      <option value="bathroom">Bathroom Remodeling</option>
+                      <option value="addition">Home Addition</option>
+                      <option value="basement">Basement Finishing</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="budget" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Budget Range
+                    </label>
+                    <select
+                      id="budget"
+                      name="budget"
+                      value={formData.budget}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="">Select your budget range</option>
+                      <option value="under-25k">Under $25,000</option>
+                      <option value="25k-50k">$25,000 - $50,000</option>
+                      <option value="50k-100k">$50,000 - $100,000</option>
+                      <option value="100k+">$100,000+</option>
+                      <option value="discuss">Prefer to discuss</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* Message */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <div>
+                  <label htmlFor="message" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Tell us about your project
                   </label>
                   <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
                     rows="4"
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="Describe your vision, timeline, and any specific requirements..."
                   ></textarea>
                 </div>
 
-                {/* Terms */}
-                <div className="flex items-start space-x-3">
-                  <input
-                    type="checkbox"
-                    className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    I agree to receive communications from Novus regarding my project and understand that I can unsubscribe at any time.
-                  </label>
-                </div>
-
                 {/* Submit Button */}
-                <div className="pt-6">
+                <div className="pt-4">
                   <button
                     type="submit"
-                    className="w-full text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                    style={{background: 'linear-gradient(90deg, #F29D35 0%, #E8932F 100%)'}}
-                    onMouseEnter={(e) => e.target.style.background = 'linear-gradient(90deg, #E8932F 0%, #D8832A 100%)'}
-                    onMouseLeave={(e) => e.target.style.background = 'linear-gradient(90deg, #F29D35 0%, #E8932F 100%)'}
+                    disabled={isSubmitting}
+                    className={`w-full text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg ${
+                      isSubmitting 
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:shadow-xl transform hover:scale-[1.02]'
+                    }`}
                   >
-                    Get My Free Consultation
+                    {isSubmitting ? 'Sending...' : 'Get My Free Consultation'}
                   </button>
                   <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
                     We'll contact you within 24 hours to schedule your consultation
                   </p>
                 </div>
               </form>
-
               {/* Trust Indicators */}
               <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-gray-200 dark:border-gray-600">
                 <div className="text-center">
@@ -1192,7 +1318,7 @@ export default function Home() {
             <div>
               <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Contact</h4>
               <div className="space-y-2 text-gray-600 dark:text-gray-400">
-                <p>Call: (555) 123-4567</p>
+                <p>Call: (786) 246-4687</p>
                 <p>Email: info@novusremodeling.com</p>
                 <p>Licensed & Insured</p>
               </div>

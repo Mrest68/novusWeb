@@ -1,32 +1,70 @@
 "use client";
-
+import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import Navbar from "../components/Navbar";
 
 export default function Contact() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     projectType: '',
-    timeline: '',
     budget: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formStatus, setFormStatus] = useState({ type: '', message: '' });
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    // You would typically send this to a backend service
+    setIsSubmitting(true);
+    setFormStatus({ type: '', message: '' });
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.message || 'Something went wrong');
+
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        projectType: '',
+        budget: '',
+        message: ''
+      });
+      setFormStatus({
+        type: 'success',
+        message: 'Thank you! We will contact you soon.'
+      });
+    } catch (error) {
+      setFormStatus({
+        type: 'error',
+        message: error.message
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -95,7 +133,7 @@ export default function Contact() {
             <div className="flex items-center">
               <Link href="/" className="flex items-center">
                 <Image 
-                  src="/logoNovus.jpg" 
+                  src="/logoNovus.png" 
                   alt="Novus Home Remodeling" 
                   width={60} 
                   height={60} 
@@ -159,11 +197,11 @@ export default function Contact() {
           {isMenuOpen && (
             <div className="md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-100">
               <div className="px-4 py-6 space-y-4">
-                <a href="/" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Home</a>
-                <a href="/services" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Services</a>
-                <a href="/about" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">About</a>
-                <a href="/reviews" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Reviews</a>
-                <a href="/contact" className="block px-4 py-3 text-orange-500 bg-orange-50 rounded-lg font-medium">Contact</a>
+                <Link href="/" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Home</Link>
+                <Link href="/services" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Services</Link>
+                <Link href="/about" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">About</Link>
+                <Link href="/reviews" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Reviews</Link>
+                <Link href="/contact" className="block px-4 py-3 text-orange-500 bg-orange-50 rounded-lg font-medium">Contact</Link>
                 <a 
                   href="tel:+15551234567" 
                   className="block w-full text-center text-white px-6 py-3 rounded-full font-medium transition-all duration-300 mt-4"
@@ -190,10 +228,10 @@ export default function Contact() {
         </div>
         
         {/* Industrial Geometric Shapes */}
-        <div className="absolute top-32 right-16 w-32 h-32 border-4 border-orange-400 opacity-20 rotate-45"></div>
-        <div className="absolute bottom-32 left-16 w-24 h-24 border-4 border-orange-500 opacity-30 rotate-12"></div>
-        <div className="absolute top-48 left-32 w-16 h-16 bg-orange-400 opacity-15 rotate-45"></div>
-        <div className="absolute bottom-48 right-32 w-20 h-20 bg-orange-500 opacity-20 rotate-12"></div>
+        <div className="absolute hidden md:block top-32 right-[10%] w-32 h-32 border-4 border-orange-400 opacity-20 rotate-45 transform hover:rotate-90 transition-transform duration-1000"></div>
+        <div className="absolute hidden md:block bottom-32 left-[10%] w-24 h-24 border-4 border-orange-500 opacity-30 rotate-12 transform hover:rotate-45 transition-transform duration-1000"></div>
+        <div className="absolute top-48 left-[5%] w-16 h-16 bg-orange-400 opacity-15 rotate-45 animate-pulse"></div>
+        <div className="absolute bottom-48 right-[5%] w-20 h-20 bg-orange-500 opacity-20 rotate-12 animate-pulse"></div>
         
         {/* Textured Overlay */}
         <div className="absolute inset-0 bg-black opacity-20"></div>
@@ -207,7 +245,7 @@ export default function Contact() {
               Contact Us
             </h1>
             <p className="text-2xl text-gray-200 mb-16 font-medium leading-relaxed max-w-3xl mx-auto drop-shadow-lg">
-              Ready to build your dream? Let's discuss your project and turn your vision into reality
+              Ready to build your dream? Let&apos;s discuss your project and turn your vision into reality
             </p>
             
             {/* CTA Buttons */}
@@ -223,7 +261,7 @@ export default function Contact() {
               </a>
               <a 
                 href="#quote-form" 
-                className="inline-flex items-center justify-center px-10 py-5 border-3 border-orange-500 text-orange-400 rounded-sm font-bold text-lg hover:border-orange-400 hover:text-orange-300 hover:bg-orange-500/10 transition-all duration-300 uppercase tracking-wide"
+                className="inline-flex items-center justify-center px-10 py-5 border-3 border-orange-500 text-orange-300 rounded-sm font-bold text-lg hover:border-orange-400 hover:text-white hover:bg-orange-500/20 transition-all duration-300 uppercase tracking-wide"
               >
                 <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -271,41 +309,126 @@ export default function Contact() {
             <div className="text-center mb-16">
               <h2 className="text-5xl font-light text-gray-900 mb-6">Request Your Free Estimate</h2>
               <p className="text-xl text-gray-600 font-light max-w-2xl mx-auto">
-                Tell us about your project and we'll provide a detailed estimate within 24 hours
+                Tell us about your project and we&apos;ll provide a detailed estimate within 24 hours
               </p>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Personal Information */}
+            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 lg:p-12">
+              {formStatus.message && (
+                <div className={`p-4 rounded-lg mb-6 ${
+                  formStatus.type === 'success' 
+                    ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-100' 
+                    : 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-100'
+                }`}>
+                  {formStatus.message}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* First and Last Name */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
+                    <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      First Name *
                     </label>
                     <input
                       type="text"
-                      name="name"
-                      value={formData.name}
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                      placeholder="Your full name"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="Enter your first name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Last Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="Enter your last name"
+                    />
+                  </div>
+                </div>
+
+                {/* Email and Phone */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Email Address *
                     </label>
                     <input
                       type="email"
+                      id="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                      placeholder="your@email.com"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="your.email@example.com"
                     />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
+                </div>
+
+                {/* Project Type and Budget */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="projectType" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Project Type *
+                    </label>
+                    <select
+                      id="projectType"
+                      name="projectType"
+                      value={formData.projectType}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="">Select your project type</option>
+                      {services.map(service => (
+                        <option key={service} value={service.toLowerCase()}>{service}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="budget" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Budget Range
+                    </label>
+                    <select
+                      id="budget"
+                      name="budget"
+                      value={formData.budget}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="">Select your budget range</option>
+                      {budgetRanges.map(range => (
+                        <option key={range} value={range.toLowerCase()}>{range}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
@@ -325,24 +448,7 @@ export default function Contact() {
                 </div>
 
                 {/* Project Details */}
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Project Type *
-                    </label>
-                    <select
-                      name="projectType"
-                      value={formData.projectType}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    >
-                      <option value="">Select a service</option>
-                      {services.map((service, index) => (
-                        <option key={index} value={service}>{service}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Timeline
@@ -377,36 +483,62 @@ export default function Contact() {
                   </div>
                 </div>
 
+                {/* Message */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Project Details
+                  <label htmlFor="message" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Tell us about your project
                   </label>
                   <textarea
+                    id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
-                    rows={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="Tell us about your project vision, specific requirements, or any questions you have..."
+                    rows="4"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    placeholder="Describe your vision, timeline, and any specific requirements..."
                   ></textarea>
                 </div>
 
                 {/* Submit Button */}
-                <div className="text-center">
+                <div className="pt-4">
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center px-12 py-4 bg-orange-500 text-white rounded-full font-medium text-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105 shadow-xl"
+                    disabled={isSubmitting}
+                    className={`w-full text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg ${
+                      isSubmitting 
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:shadow-xl transform hover:scale-[1.02]'
+                    }`}
                   >
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                    Send My Request
+                    {isSubmitting ? 'Sending...' : 'Get My Free Consultation'}
                   </button>
-                  <p className="text-sm text-gray-500 mt-4">
-                    We'll respond within 24 hours with your detailed estimate
+                  <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+                    We'll contact you within 24 hours to schedule your consultation
                   </p>
                 </div>
               </form>
+
+              {/* Trust Indicators */}
+              <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-gray-200 dark:border-gray-600">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <span className="text-green-600 dark:text-green-400 font-bold">✓</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Free Consultation</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <span className="text-blue-600 dark:text-blue-400 font-bold">📋</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Detailed Estimate</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <span className="text-purple-600 dark:text-purple-400 font-bold">🔒</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">No Obligation</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -450,7 +582,7 @@ export default function Contact() {
           </h2>
           <p className="text-xl text-gray-300 mb-12 font-light max-w-3xl mx-auto leading-relaxed">
             For urgent project needs or emergency consultations, call us directly. 
-            We're here to help when you need us most.
+            We&apos;re here to help when you need us most.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-6">
             <a 
@@ -489,10 +621,10 @@ export default function Contact() {
             <div className="text-center">
               <h4 className="text-lg font-medium mb-4 text-gray-900">Quick Links</h4>
               <ul className="space-y-2 text-gray-600 font-light">
-                <li><a href="/" className="hover:text-orange-500 transition-colors">Home</a></li>
-                <li><a href="/services" className="hover:text-orange-500 transition-colors">Services</a></li>
-                <li><a href="/about" className="hover:text-orange-500 transition-colors">About</a></li>
-                <li><a href="/reviews" className="hover:text-orange-500 transition-colors">Reviews</a></li>
+                <li><Link href="/" className="hover:text-orange-500 transition-colors">Home</Link></li>
+                <li><Link href="/services" className="hover:text-orange-500 transition-colors">Services</Link></li>
+                <li><Link href="/about" className="hover:text-orange-500 transition-colors">About</Link></li>
+                <li><Link href="/reviews" className="hover:text-orange-500 transition-colors">Reviews</Link></li>
               </ul>
             </div>
 

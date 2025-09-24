@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Contact() {
@@ -14,6 +15,8 @@ export default function Contact() {
     budget: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formStatus, setFormStatus] = useState({ type: '', message: '' });
 
   const handleInputChange = (e) => {
     setFormData({
@@ -22,18 +25,52 @@ export default function Contact() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    // You would typically send this to a backend service
+    setIsSubmitting(true);
+    setFormStatus({ type: '', message: '' });
+
+    try {
+      // Map single name field to firstName / lastName expected by API
+      const names = formData.name.trim().split(/\s+/);
+      const firstName = names.shift() || '';
+      const lastName = names.join(' ') || '';
+
+      const payload = {
+        firstName,
+        lastName,
+        email: formData.email,
+        phone: formData.phone,
+        projectType: formData.projectType,
+        budget: formData.budget,
+        message: formData.message
+      };
+
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || 'Submission failed');
+
+      setFormStatus({ type: 'success', message: 'Thanks — your request was sent. We will contact you within 24 hours.' });
+      setFormData({ name: '', email: '', phone: '', projectType: '', timeline: '', budget: '', message: '' });
+    } catch (err) {
+      console.error(err);
+      setFormStatus({ type: 'error', message: err.message || 'Something went wrong — please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
     {
       icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
       title: "Phone",
-      details: "(555) 123-4567",
+      details: "(754) 246-4687",
       subtext: "Mon-Fri 8AM-6PM, Sat 9AM-4PM"
     },
     {
@@ -98,32 +135,44 @@ export default function Contact() {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-12">
-              <a href="/" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
+              <Link href="/" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
                 Home
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="/services" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
+              </Link>
+              <Link href="/services" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
                 Services
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="/about" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
+              </Link>
+              <Link href="/about" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
                 About
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="/reviews" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
+              </Link>
+              <Link href="/reviews" className="text-gray-600 hover:text-orange-500 transition-all duration-300 font-light text-lg relative group">
                 Reviews
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="/contact" className="text-orange-500 transition-all duration-300 font-medium text-lg relative">
+              </Link>
+              <Link href="/contact" className="text-orange-500 transition-all duration-300 font-medium text-lg relative">
                 Contact
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-orange-500"></span>
-              </a>
+              </Link>
             </div>
 
             {/* Call Button & Mobile Menu Toggle */}
             <div className="flex items-center space-x-6">
-              <a 
-                href="tel:+15551234567" 
+              <Link
+                href="tel:7542464687"
+                className="hidden sm:inline-flex items-center text-white px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                style={{backgroundColor: '#F29D35'}}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#F29D35'}
+              >
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+                (754) 246-4687
+              </Link>
+              <Link
+                href="tel:7542464687"
                 className="hidden sm:inline-flex items-center text-white px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 style={{backgroundColor: '#F29D35'}} 
                 onMouseEnter={(e) => e.target.style.backgroundColor = '#E8932F'} 
@@ -132,8 +181,8 @@ export default function Contact() {
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
-                (555) 123-4567
-              </a>
+                (754) 246-4687
+              </Link>
               
               {/* Mobile menu button */}
               <button
@@ -151,18 +200,18 @@ export default function Contact() {
           {isMenuOpen && (
             <div className="md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-100">
               <div className="px-4 py-6 space-y-4">
-                <a href="/" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Home</a>
-                <a href="/services" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Services</a>
-                <a href="/about" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">About</a>
-                <a href="/reviews" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Reviews</a>
-                <a href="/contact" className="block px-4 py-3 text-orange-500 bg-orange-50 rounded-lg font-medium">Contact</a>
-                <a 
-                  href="tel:+15551234567" 
+                <Link href="/" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Home</Link>
+                <Link href="/services" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Services</Link>
+                <Link href="/about" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">About</Link>
+                <Link href="/reviews" className="block px-4 py-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-300 font-light">Reviews</Link>
+                <Link href="/contact" className="block px-4 py-3 text-orange-500 bg-orange-50 rounded-lg font-medium">Contact</Link>
+                <Link
+                  href="tel:+17542464687" 
                   className="block w-full text-center text-white px-6 py-3 rounded-full font-medium transition-all duration-300 mt-4"
                   style={{backgroundColor: '#F29D35'}}
                 >
-                  (555) 123-4567
-                </a>
+                  (754) 246-4687
+                </Link>
               </div>
             </div>
           )}
@@ -184,13 +233,13 @@ export default function Contact() {
               Contact Us
             </h1>
             <p className="text-2xl text-gray-600 mb-16 font-light leading-relaxed max-w-3xl mx-auto">
-              Ready to transform your home? Let's discuss your project and bring your vision to life
+              Ready to transform your home? Let&#39;s discuss your project and bring your vision to life
             </p>
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-6 mb-16">
               <a 
-                href="tel:+15551234567" 
+                href="tel:+17542464687" 
                 className="inline-flex items-center justify-center px-10 py-5 bg-orange-500 text-white rounded-full font-medium text-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105 shadow-xl"
               >
                 <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -248,7 +297,7 @@ export default function Contact() {
             <div className="text-center mb-16">
               <h2 className="text-5xl font-light text-gray-900 mb-6">Request Your Free Estimate</h2>
               <p className="text-xl text-gray-600 font-light max-w-2xl mx-auto">
-                Tell us about your project and we'll provide a detailed estimate within 24 hours
+                Tell us about your project and we&#39;ll provide a detailed estimate within 24 hours
               </p>
             </div>
 
@@ -297,7 +346,7 @@ export default function Contact() {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="(555) 123-4567"
+                    placeholder="(754) 246-4687"
                   />
                 </div>
 
@@ -372,15 +421,24 @@ export default function Contact() {
                 <div className="text-center">
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center px-12 py-4 bg-orange-500 text-white rounded-full font-medium text-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105 shadow-xl"
+                    disabled={isSubmitting}
+                    className={`inline-flex items-center justify-center px-12 py-4 rounded-full font-medium text-lg transition-all duration-300 transform ${isSubmitting ? 'bg-orange-300 text-white cursor-wait' : 'bg-orange-500 text-white hover:bg-orange-600 hover:scale-105 shadow-xl'}`}
                   >
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
-                    Send My Request
+                    {isSubmitting ? 'Sending…' : 'Send My Request'}
                   </button>
+
+                  {/* Form status messages */}
+                  {formStatus.message && (
+                    <p className={`mt-4 text-sm ${formStatus.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                      {formStatus.message}
+                    </p>
+                  )}
+
                   <p className="text-sm text-gray-500 mt-4">
-                    We'll respond within 24 hours with your detailed estimate
+                    We&#39;ll respond within 24 hours with your detailed estimate
                   </p>
                 </div>
               </form>
@@ -427,17 +485,17 @@ export default function Contact() {
           </h2>
           <p className="text-xl text-gray-300 mb-12 font-light max-w-3xl mx-auto leading-relaxed">
             For urgent project needs or emergency consultations, call us directly. 
-            We're here to help when you need us most.
+            We&#39;re here to help when you need us most.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-6">
             <a 
-              href="tel:+15551234567" 
+              href="tel:+17542464687" 
               className="inline-flex items-center justify-center px-12 py-6 bg-white text-gray-900 rounded-full font-medium text-xl hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-xl"
             >
               <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
               </svg>
-              Call (555) 123-4567
+              Call (754) 246-4687
             </a>
             <a 
               href="mailto:info@novusremodeling.com" 
@@ -466,17 +524,17 @@ export default function Contact() {
             <div className="text-center">
               <h4 className="text-lg font-medium mb-4 text-gray-900">Quick Links</h4>
               <ul className="space-y-2 text-gray-600 font-light">
-                <li><a href="/" className="hover:text-orange-500 transition-colors">Home</a></li>
-                <li><a href="/services" className="hover:text-orange-500 transition-colors">Services</a></li>
-                <li><a href="/about" className="hover:text-orange-500 transition-colors">About</a></li>
-                <li><a href="/reviews" className="hover:text-orange-500 transition-colors">Reviews</a></li>
+                <li><Link href="/" className="hover:text-orange-500 transition-colors">Home</Link></li>
+                <li><Link href="/services" className="hover:text-orange-500 transition-colors">Services</Link></li>
+                <li><Link href="/about" className="hover:text-orange-500 transition-colors">About</Link></li>
+                <li><Link href="/reviews" className="hover:text-orange-500 transition-colors">Reviews</Link></li>
               </ul>
             </div>
 
             <div className="text-center md:text-right">
               <h4 className="text-lg font-medium mb-4 text-gray-900">Contact</h4>
               <div className="space-y-2 text-gray-600 font-light">
-                <p>(555) 123-4567</p>
+                <p>(754) 246-4687</p>
                 <p>info@novusremodeling.com</p>
                 <p>123 Main Street<br/>Your City, ST 12345</p>
               </div>
@@ -485,6 +543,7 @@ export default function Contact() {
 
           <div className="border-t border-gray-200 mt-12 pt-8 text-center">
             <p className="text-gray-500 font-light">&copy; 2025 Novus Remodeling. All rights reserved.</p>
+
           </div>
         </div>
       </footer>

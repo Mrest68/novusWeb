@@ -1,0 +1,73 @@
+import { Resend } from 'resend';
+import { NextResponse } from 'next/server';
+
+const resend = new Resend('re_dV9KNPiB_KFxTMZfMjffH6LbgCFSKTE9N');
+
+export async function POST(request) {
+  console.log('Starting POST request handler');
+  
+  try {
+    const body = await request.json();
+    console.log('Received form data:', body);
+    
+    const { name, email, phone, message, service } = body;
+
+    if (!name || !email || !phone || !message) {
+      console.log('Missing required fields:', { name, email, phone, message });
+      return NextResponse.json(
+        { message: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    console.log('Sending email...');
+    const data = await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: ['mrest046@fiu.edu'],
+      subject: `New Consultation Request - ${service}`,
+      html: `
+        <h2>New Consultation Request</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+        <p><strong>Service:</strong> ${service}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+      `
+    });
+
+    console.log('Email sent successfully:', data);
+    return NextResponse.json({ 
+      message: 'Email sent successfully',
+      success: true,
+      data 
+    });
+      html: `
+        <h2>New Consultation Request</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+        <p><strong>Service:</strong> ${service}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+      `,
+    });
+
+    return NextResponse.json({ 
+      message: 'Email sent successfully',
+      success: true,
+      data 
+    });
+  } catch (error) {
+    console.error('Server error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    return NextResponse.json(
+      { message: error.message || 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
