@@ -294,7 +294,7 @@ export default function Reviews() {
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
-                Call (555) 123-4567
+                Call (754) 246-4687
               </a>
             </div>
           </div>
@@ -325,9 +325,9 @@ export default function Reviews() {
             <div className="text-center md:text-right">
               <h4 className="text-lg font-medium mb-4 text-gray-900">Contact</h4>
               <div className="space-y-2 text-gray-600 font-light">
-                <p>(555) 123-4567</p>
+                <p>(754) 246-4687</p>
                 <p>info@novusremodeling.com</p>
-                <p>123 Main Street<br/>Your City, ST 12345</p>
+                
               </div>
             </div>
           </div>

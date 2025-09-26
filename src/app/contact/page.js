@@ -71,7 +71,7 @@ export default function Contact() {
     {
       icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
       title: "Phone",
-      details: "(555) 123-4567",
+      details: "(754) 246-4687",
       subtext: "Mon-Fri 8AM-6PM, Sat 9AM-4PM"
     },
     {
@@ -178,7 +178,7 @@ export default function Contact() {
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
-                (555) 123-4567
+                (754) 246-4687
               </a>
               
               {/* Mobile menu button */}
@@ -207,7 +207,7 @@ export default function Contact() {
                   className="block w-full text-center text-white px-6 py-3 rounded-full font-medium transition-all duration-300 mt-4"
                   style={{backgroundColor: '#F29D35'}}
                 >
-                  (555) 123-4567
+                  (754) 246-4687
                 </a>
               </div>
             </div>
@@ -443,7 +443,7 @@ export default function Contact() {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="(555) 123-4567"
+                    placeholder="(754) 246-4687"
                   />
                 </div>
 
@@ -592,7 +592,7 @@ export default function Contact() {
               <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
               </svg>
-              Call (555) 123-4567
+              Call (754) 246-4687
             </a>
             <a 
               href="mailto:info@novusremodeling.com" 
@@ -631,7 +631,7 @@ export default function Contact() {
             <div className="text-center md:text-right">
               <h4 className="text-lg font-medium mb-4 text-gray-900">Contact</h4>
               <div className="space-y-2 text-gray-600 font-light">
-                <p>(555) 123-4567</p>
+                <p>(754) 246-4687</p>
                 <p>info@novusremodeling.com</p>
                 <p>123 Main Street<br/>Your City, ST 12345</p>
               </div>

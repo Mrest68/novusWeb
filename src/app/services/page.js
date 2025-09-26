@@ -467,9 +467,9 @@ export default function Services() {
             <div className="text-center md:text-right">
               <h4 className="text-lg font-medium mb-4 text-gray-900">Contact</h4>
               <div className="space-y-2 text-gray-600 font-light">
-                <p>(555) 123-4567</p>
+                <p>(754) 246-4687</p>
                 <p>info@novusremodeling.com</p>
-                <p>123 Main Street<br/>Your City, ST 12345</p>
+               
               </div>
             </div>
           </div>
