@@ -1,10 +1,19 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
-const resend = new Resend('re_dV9KNPiB_KFxTMZfMjffH6LbgCFSKTE9N');
-
 export async function POST(request) {
   try {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error('Missing RESEND_API_KEY environment variable');
+      return NextResponse.json(
+        { success: false, message: 'Email service not configured. Contact admin.' },
+        { status: 500 }
+      );
+    }
+
+    const resend = new Resend(apiKey);
+
     const body = await request.json();
     const { firstName, lastName, email, phone, projectType, budget, message } = body;
 
@@ -17,7 +26,7 @@ export async function POST(request) {
     }
 
     const data = await resend.emails.send({
-      from: 'onboarding@resend.dev',
+      from: 'Novus Contact <onboarding@resend.dev>',
       to: ['mrest046@fiu.edu'],
       subject: `New Consultation Request - ${projectType}`,
       html: `
@@ -34,7 +43,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error sending contact email:', error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function GET() {
   try {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error('Missing RESEND_API_KEY for test route');
+      return NextResponse.json({ message: 'RESEND_API_KEY not configured', success: false }, { status: 500 });
+    }
+
+    const resend = new Resend(apiKey);
+
     const data = await resend.emails.send({
       from: 'Novus Contact Form <onboarding@resend.dev>',
       to: ['miguel.restrepo0303@gmail.com'],
@@ -16,16 +22,9 @@ export async function GET() {
       `,
     });
 
-    return NextResponse.json({ 
-      message: 'Test email sent successfully',
-      success: true,
-      data 
-    });
+    return NextResponse.json({ message: 'Test email sent successfully', success: true, data });
   } catch (error) {
     console.error('Server error:', error);
-    return NextResponse.json(
-      { message: error.message || 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: error.message || 'Internal server error' }, { status: 500 });
   }
 }
