@@ -388,7 +388,7 @@ export default function Contact() {
                       onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="(555) 123-4567"
+                      placeholder="(754) 246-4687"
                     />
                   </div>
                 </div>
